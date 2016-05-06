@@ -18,10 +18,10 @@ var socketioRedis 		= require("passport-socketio-redis");
 var mongo				= require("mongoose");
 var bcrypt				= require("bcrypt-nodejs");
 
-
-
+// Connect to the database called 'secureChat' on the local machine.
 mongo.connect("mongodb://localhost/secureChat");
 
+// Define a mongoose schema representing a user account.
 var userSchema = mongo.Schema({
     username: {
 		type: String,
@@ -30,11 +30,11 @@ var userSchema = mongo.Schema({
     password: String
 });
 
-// access the collection table called Users
+// Access the collection table called Users
 var Users = mongo.model("Users", userSchema);
 
 // Allow our app to use bodyParser for POST requests.
-app.use(bodyParser.urlencoded({ extended: true }) );
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Set templating parsing engine to parse Pug files (.pug).
 app.set('view engine', 'pug');
@@ -85,24 +85,10 @@ function authorizeSuccess(data, accept) {
 }
 
 function authorizeFail(data, message, error, accept) {
-	if(error) return accept(new Error(message));
+	if (error) return accept(new Error(message));
 	console.log("Unauthorized user connected");
 	return accept();
 }
-
-// TODO: Remove this when mongodb is implemented.
-// Define test user login records.
-records = [
-	{
-		id: 1, username: "chris", password: "pass", displayName: "Chris", emails: [ {value: "chris@example.com"} ]
-	},
-	{
-		id: 2, username: "bob", password: "pass", displayName: "Bob", emails: [ {value: "bob@example.com"} ]
-	},
-	{
-		id: 3, username: "hello", password: "pass", displayName: "hi", emails: [ { value: "hello@example.com" } ]
-	}
-];
 
 // Configure passport to use local (username-password) strategy for authentication.
 // More info about the passportJS authentication:
@@ -110,56 +96,40 @@ records = [
 passport.use(new Strategy(
 	function (username, password, done) {
 
-		// TODO: Change this to query mongodb instead of predefined array.
 		Users.findOne({ username: username }, function(err, result) {
-			if(err) {
+			if (err) {
 				res.send("login error");
 				return done(null, false);
 			}
 			else {
-				console.log(result);
-				return done(null, result);
+
+				// Compare the password with the salted password hash.
+				// True if they match. Else return authentication failure.
+				if (bcrypt.compareSync(password, result.password)) {
+					return done(null, result);
+				}
+				else {
+					return done(null, false);
+				}
 			}
 		});
-
-
-		// // Find the user by username from the records array.
-		// for (var i = records.length - 1; i >= 0; i--) {
-		// 	if (records[i].username === username &&
-		// 		records[i].password == password) {
-		// 		return done(null, records[i]);
-		// 	}
-		// }
-		// return done(null, false);
 }));
 
 // Called by req.login().
 passport.serializeUser(function (user, callback) {
-	console.log("a" + user.id);
-
-	callback(null, user.id);
+	callback(null, user);
 });
 
 passport.deserializeUser(function (id, callback) {
 
-	// TODO: Change this to query mongodb instead of predefined array.
 	Users.findById(id, function(err, result) {
-		if(err) {
-			console.log(err);
+		if (err) {
 			return callback(null, false);
 		}
 		else {
-			console.log("?" + result);
-			return callback(null, result.id);
+			return callback(null, result);
 		}
 	});
-	// // Find the user by id from the records array.
-	// for (var i = records.length - 1; i >= 0; i--) {
-	// 	if (records[i].id === id) {
-	// 		return callback(null, records[i]);
-	// 	}
-	// }
-	//return callback(new Error("User with ID " + id + " does not exit."));
 });
 
 
@@ -170,7 +140,7 @@ passport.deserializeUser(function (id, callback) {
 // When the client requests the root directory,
 // send back the rendered index.pug template.
 app.get("/", function (req, res) {
-	console.log("/ " + req.user);
+	console.log("req.user: " + req.user);
 	res.render("index", {user: req.user});	// Expose req.user to the template.
 });
 
@@ -214,36 +184,27 @@ app.post("/register", function (req, res) {
 	console.log("Username: " + req.body['username']);
 	console.log("Password: " + req.body['password']);
 
-	// TODO: Implement the below code for mongodb for user account creation.
-
-	// //Create user account object.
+	// Create user account object based on mongodb User schema.
 	var userAcc = new Users({
-			username: req.body['username'],
-			password: bcrypt.hashSync(req.body['password'], bcrypt.genSaltSync(8), null)
+		username: req.body['username'],
+		password: bcrypt.hashSync(req.body['password'], bcrypt.genSaltSync(8), null)
 	});
 
-	// //Find if username is already taken.
-	// .next() will return null if there's no results.
-
+	// Create new user account in the database.
+	// Make sure the usernames are unique.
 	userAcc.save(function (error, result) {
-	//http://mongodb.github.io/node-mongodb-native/2.0/api/Collection.html#~insertOneWriteOpCallback
 		if (error){
-			if(error.code === 11000){
+			if (error.code === 11000){
 				res.send("Error 11000 username taken");
 			}
 		}
 		else {
-			console.log(result);
-			passport.authenticate("local", {failureRedirect: "/fail"}),
-			function (req, res) {
-				res.redirect("/");
-				console.log("User logged in: " + req.user.username);
-				console.log("Cookie will expire in " + req.session.cookie.maxAge + " seconds");
-			}
+			passport.authenticate("local", {failureRedirect: "/fail"});
 			res.redirect("/");
 		}
 	});
 });
+
 
 /**
  * Handle the socket.io events.
