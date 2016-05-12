@@ -41,6 +41,7 @@ app.set('view engine', 'pug');
 
 // Configure our app to use 'public' as the static files directory.
 app.use(express.static('public'));
+app.use('/bower_components',  express.static(__dirname + '/bower_components'));
 
 // Redis Store for storing user sessions.
 var redisStore = new RedisStore({host: 'localhost', port: 6379, client: redis});
@@ -59,7 +60,7 @@ app.use(session({
 	secret: "secret key", 		// Keep your secret key
 	key: "express.sid",
 	store: redisStore,
-	cookie: {maxAge: 86400},
+	cookie: {maxAge: 4.32e7},	// 12 hours (maxAge is in milliseconds)
 	unset: "destroy"
 }));
 
@@ -199,7 +200,9 @@ app.post("/register", function (req, res) {
 			}
 		}
 		else {
-			passport.authenticate("local", {failureRedirect: "/fail"});
+			req.login(userAcc, function (err) {
+				if (err) console.log("Error logging in after registration " + err);
+			});
 			res.redirect("/");
 		}
 	});
@@ -226,6 +229,7 @@ io.on("connection", function (client) {
 	// When the client sends a chat message, emit the message to everyone on the server socket.
 	client.on("sendChatMessage", function (data) {
 		io.emit("newChatMessage", data);
+		console.log("Received new chat message: " + data.message);
 	});
 
 	// Respond to the client when they disconnect their connection.

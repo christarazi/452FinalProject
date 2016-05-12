@@ -5,8 +5,10 @@ html
 	
 	script(src='/socket.io/socket.io.js')
 	
-	script(src='https://code.jquery.com/jquery-2.2.3.min.js', integrity='sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=', crossorigin='anonymous')
-	
+	script(src='bower_components/jquery/dist/jquery.min.js')
+	script(src='bower_components/crypto-js/crypto-js.js')
+	script(src='bower_components/crypto-js/aes.js')
+
 	style(type='text/css').
 		#error {
 		color: red;
@@ -15,28 +17,33 @@ html
 		border: solid;
 		height: 500px;
 		width: 500px;
+		overflow: auto;
 		}
-		.nicknames {
+		.names-others {
 		color: blue;
 		}
-		.myNickname {
+		.current-name {
 		color: orange;
 		}
 	body
 		h1 Welcome To Secure Chat!
 
-		if user === undefined
+		if (!user)
 			a(href='/login') Login
+			br
+			a(href="/register") Register
 		else
 			h2 
 				| Welcome 
-				span.myNickname #{user.username}
+				span.current-name #{user.username}
 				| !
+			
+			label Secret Key: 
+			input(id='secretKey', type='password')
+			br
 			a(href="/logout") Logout
 
 			br
-
-			p#greeting
 
 			p#error
 
