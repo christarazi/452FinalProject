@@ -30,6 +30,17 @@ socket.on("newChatMessage", function(data) {
 		{ mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.Pkcs7 });
 	var decrypted = bytes.toString(CryptoJS.enc.Utf8);
 
+	// If the decrypted message is empty that means the user has the wrong secret key.
+	if (decrypted === "") {
+		errorField.html("Warning: received chat message but it was empty. Your secret key may not match");
+		return;
+	}
+	else {
+		errorField.html("");
+	}
+
+	// *** TODO: Prevent XSS below by encoding `decrypt` to strip any tags. ***
+
 	// Represents an element that contains all the data inside a chat message.
 	var elem = "<div>" + 
 					"<b><span class = '" + colorClass + "'>" + data.from +  " </span></b>" + 

@@ -102,7 +102,7 @@ passport.use(new Strategy(
 				res.send("login error");
 				return done(null, false);
 			}
-			else {
+			else if (result) {
 
 				// Compare the password with the salted password hash.
 				// True if they match. Else return authentication failure.
@@ -112,6 +112,9 @@ passport.use(new Strategy(
 				else {
 					return done(null, false);
 				}
+			}
+			else {
+				return done(null, false);
 			}
 		});
 }));
