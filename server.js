@@ -20,8 +20,10 @@ var bcrypt				= require("bcrypt-nodejs");
 var csurf               = require("csurf");
 var csrfProtection      = csurf({ cookie: true });
 
+var mongoUrl = process.env.MONGODB_URI || "mongodb://localhost/secureChat";
+
 // Connect to the database called 'secureChat' on the local machine.
-mongo.connect("mongodb://localhost/secureChat");
+mongo.connect(mongoUrl);
 
 // Define a mongoose schema representing a user account.
 var userSchema = mongo.Schema({
