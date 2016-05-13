@@ -1,4 +1,4 @@
-# CPSC 452 Final Project - Secure Chat 
+# CPSC 452 Final Project - Secure Chat
 
 Implementing a secure chat web application.
 
@@ -19,6 +19,7 @@ Implementing a secure chat web application.
 - [Redis](http://redis.io/)
 - [Bower](https://www.npmjs.com/package/bower)
 - [CryptoJS](https://github.com/brix/crypto-js)
+- [Expressjs/csurf](https://github.com/expressjs/csurf)
 
 ### Setting up dev environment
 
@@ -46,7 +47,7 @@ mv bower_components public/
 ```
 
 ## Application architecture
-    
+
 ```shell
 Root directory
 ├── package.json            # Metadata for our application (lists all dependencies, etc.)
@@ -59,4 +60,3 @@ Root directory
     ├── login.pug           # The login page.
     └── register.pug        # The registration page.
 ```
-

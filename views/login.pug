@@ -5,10 +5,10 @@ html
 		h1=message
 
 	form(method='post')
-		label Username: 
+		label Username:
 		input(name='username')
 		br
 		label Password:
 		input(type='password', name='password')
 		input(type='submit')
-
+		input(type='hidden', name='_csrf', value=csrfToken)

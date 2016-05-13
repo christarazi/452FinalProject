@@ -17,6 +17,8 @@ var RedisStore 			= require('connect-redis')(session);
 var socketioRedis 		= require("passport-socketio-redis");
 var mongo				= require("mongoose");
 var bcrypt				= require("bcrypt-nodejs");
+var csurf               = require("csurf");
+var csrfProtection      = csurf({ cookie: true });
 
 // Connect to the database called 'secureChat' on the local machine.
 mongo.connect("mongodb://localhost/secureChat");
@@ -35,6 +37,20 @@ var Users = mongo.model("Users", userSchema);
 
 // Allow our app to use bodyParser for POST requests.
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cookieParser());
+
+// Allow our app to use csruf protection
+app.use(csrfProtection);
+
+// Error handling for invalid csrf tokens
+app.use(function (err, req, res, next) {
+  if (err.code !== 'EBADCSRFTOKEN') return next(err)
+
+  // handle CSRF token errors here
+  res.status(403);
+  res.send('form tampered with');
+});
 
 // Set templating parsing engine to parse Pug files (.pug).
 app.set('view engine', 'pug');
@@ -156,23 +172,22 @@ app.get("/logout", function (req, res) {
 });
 
 // This is the login page.
-app.get("/login", function (req, res) {
+app.get("/login", csrfProtection, function (req, res) {
 
 	var message;
 	if (req.isAuthenticated()) { message = "Welcome " + req.user.username + "!"; }
 	else { message = "Please login"; }
-
-	res.render("login", {message: message});
+	res.render("login", {message: message, csrfToken: req.csrfToken()});
 });
 
 // This is the reregistration page.
-app.get("/register", function (req, res) {
+app.get("/register", csrfProtection, function (req, res) {
 	if (req.isAuthenticated()) { res.redirect("/"); }
-	else { res.render("register", {}); }
+	else { res.render("register", {csrfToken: req.csrfToken() }); }
 });
 
 // Handle the user submitting the login form.
-app.post("/login",
+app.post("/login", csrfProtection,
 	passport.authenticate("local", {failureRedirect: "/fail"}),
 	function (req, res) {
 		res.redirect("/");
@@ -182,7 +197,7 @@ app.post("/login",
 );
 
 // Handle user registration.
-app.post("/register", function (req, res) {
+app.post("/register", csrfProtection, function (req, res) {
 
 	// bodyParser middleware allows us to access the body of the request object.
 	console.log("Username: " + req.body['username']);
@@ -210,7 +225,6 @@ app.post("/register", function (req, res) {
 		}
 	});
 });
-
 
 /**
  * Handle the socket.io events.
