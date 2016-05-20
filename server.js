@@ -19,6 +19,7 @@ var mongo				= require("mongoose");
 var bcrypt				= require("bcrypt-nodejs");
 var csurf               = require("csurf");
 var csrfProtection      = csurf({ cookie: true });
+var xssFilters 			= require('xss-filters');
 
 var mongoUrl = process.env.MONGODB_URI || "mongodb://localhost/secureChat";
 
@@ -115,7 +116,7 @@ function authorizeFail(data, message, error, accept) {
 passport.use(new Strategy(
 	function (username, password, done) {
 
-		Users.findOne({ username: username }, function(err, result) {
+		Users.findOne({ username: xssFilters.inHTMLData(username) }, function(err, result) {
 			if (err) {
 				res.send("login error");
 				return done(null, false);
@@ -207,7 +208,7 @@ app.post("/register", csrfProtection, function (req, res) {
 
 	// Create user account object based on mongodb User schema.
 	var userAcc = new Users({
-		username: req.body['username'],
+		username: xssFilters.inHTMLData(req.body['username']),
 		password: bcrypt.hashSync(req.body['password'], bcrypt.genSaltSync(8), null)
 	});
 

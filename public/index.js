@@ -61,13 +61,22 @@ sendBtn.click(function() {
 	if (username.length !== 0) {
 		if (chatMessage.val().length !== 0) {
 
+			// Set a max limit on the chat message length.
+			if (chatMessage.val().length > 1000) {
+				errorField.html("Message too big, please keep it below 1000 characters");
+				return;
+			}
+
+			// Prevent XSS by filtering the user input.
+			var cleanMsg = xssFilters.inHTMLData(chatMessage.val());
+
 			// Get a time-stamp of the chat message.
 			var d = new Date();
 			var dateString = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + 
 				" " + d.getDate() + "/" + d.getMonth() + "/" + d.getFullYear();		
 
 			// Encrypt the chat message with the secret key provided by the user.
-			var ciphertext = CryptoJS.AES.encrypt(chatMessage.val(), secretKey.val(), 
+			var ciphertext = CryptoJS.AES.encrypt(cleanMsg, secretKey.val(), 
 				{ mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.Pkcs7 }).toString();
 
 			data.message = ciphertext;
