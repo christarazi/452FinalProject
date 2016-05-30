@@ -32,7 +32,7 @@ socket.on("newChatMessage", function(data) {
 
 	// If the decrypted message is empty that means the user has the wrong secret key.
 	if (decrypted === "") {
-		errorField.html("Warning: received chat message but it was empty. Your secret key may not match");
+		errorField.html("Warning: There seems to be chat activity, but are not able to decrypt it. Your secret key may not match.");
 		return;
 	}
 	else {
