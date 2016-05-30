@@ -1,56 +1,27 @@
-doctype html
-html
-	head
-	title Secure Chat 0.1.0
-	
-	script(src='/socket.io/socket.io.js')
-	
-	script(src='bower_components/jquery/dist/jquery.min.js')
-	script(src='bower_components/crypto-js/crypto-js.js')
-	script(src='bower_components/crypto-js/aes.js')
-	script(src='bower_components/xss-filters/dist/xss-filters.min.js')
+extends base
 
-	style(type='text/css').
-		#error {
-		color: red;
-		}
-		#chat {
-		border: solid;
-		height: 500px;
-		width: 500px;
-		overflow: auto;
-		}
-		.names-others {
-		color: blue;
-		}
-		.current-name {
-		color: orange;
-		}
-	body
-		h1 Welcome To Secure Chat!
-
-		if (!user)
-			a(href='/login') Login
-			br
-			a(href="/register") Register
-		else
+block index
+	if (user)
+		div#chatWrap
 			h2 
 				| Welcome 
 				span.current-name #{user.username}
 				| !
-			
-			label Secret Key: 
-			input(id='secretKey', type='password')
-			br
-			a(href="/logout") Logout
-
-			br
-
+			label.sr-only(for='secretKey') Secret Key
+			input#secretKey.form-control(type='password', placeholder='Enter your shared secret key', autofocus='')
+			p#note
+				| Your shared secret key is required to chat securely with your friends. Anyone that wants to communicate must have the same key
+				| so that everyone can decrypt each other's messages.
 			p#error
-
-			div#chatWrap
-				div#chat
-				input#chatMessage
-				button#sendMessage(type='submit') Send
-
-			script(src='/index.js')
+			div#chat.form-control
+				p#emptyChat Chat room empty.
+			label.sr-only(for='chatMessage') Message: 
+			input#chatMessage.form-control(type='text', placeholder='Enter your message', required='FIll', autofocus='')
+			button#sendMessage.btn.btn-lg.btn-default(type='submit') Send
+		script(src='/index.js')
+	else
+		h1.cover-heading Communicate securely.
+		p.lead
+			| Cryptochat is a secure chat platform for chatting with people. All communication is encrypted and decrypted client-side, meaning the server has no way to read your messages. Try it out below by registering.
+		p.lead
+			a.btn.btn-lg.btn-default(href='/register') Register

@@ -39,8 +39,6 @@ socket.on("newChatMessage", function(data) {
 		errorField.html("");
 	}
 
-	// *** TODO: Prevent XSS below by encoding `decrypt` to strip any tags. ***
-
 	// Represents an element that contains all the data inside a chat message.
 	var elem = "<div>" + 
 					"<b><span class = '" + colorClass + "'>" + data.from +  " </span></b>" + 
@@ -50,10 +48,17 @@ socket.on("newChatMessage", function(data) {
 			   "</div>";
 
 	chatBox.append(elem);
+
+	// Scroll automatically to latest message.
+	// See here: 
+	// http://stackoverflow.com/a/270628/2193236
+	chatBox.scrollTop(chatBox[0].scrollHeight);
 });
 
 // Send over the chat message to the server.
 sendBtn.click(function() {
+
+	$("#emptyChat").hide();
 
 	// Represents the data we will send to the server.
 	var data = {};
@@ -93,3 +98,4 @@ sendBtn.click(function() {
 	}
 });
 
+$("#homeTab").addClass('active');

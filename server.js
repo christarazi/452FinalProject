@@ -179,7 +179,7 @@ app.get("/login", csrfProtection, function (req, res) {
 
 	var message;
 	if (req.isAuthenticated()) { message = "Welcome " + req.user.username + "!"; }
-	else { message = "Please login"; }
+	else { message = "Please login."; }
 	res.render("login", {message: message, csrfToken: req.csrfToken()});
 });
 

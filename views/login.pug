@@ -1,14 +1,14 @@
-html
-	head
-		title Login
-	body
-		h1=message
+extends base
 
-	form(method='post')
-		label Username:
-		input(name='username')
-		br
-		label Password:
-		input(type='password', name='password')
-		input(type='submit')
-		input(type='hidden', name='_csrf', value=csrfToken)
+block login
+	link(href='signin.css', rel='stylesheet')
+	if (!user)
+		h1=message
+		form#loginForm.form-signin(method='POST')
+			label.sr-only(for='inputUsername') Username
+			input#inputUsername.form-control(name='username', type='text', placeholder='Enter your username', required='', autofocus='')
+			label.sr-only(for='inputPassword') Password
+			input#inputPassword.form-control(name='password', type='password', placeholder='Enter your password', required='', autofocus='')
+			button.btn.btn-lg.btn-default(type='submit') Login
+			input(type='hidden', name='_csrf', value=csrfToken)
+	script(src="login.js")

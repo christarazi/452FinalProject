@@ -2,4 +2,4 @@
 npm-debug.log
 /*.env
 public/bower_components
-
+/bootstrap
