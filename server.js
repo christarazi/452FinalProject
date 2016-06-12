@@ -160,6 +160,14 @@ passport.deserializeUser(function (id, callback) {
  * Handle all the routing of the application.
  */
 
+// Redirect all traffic to https.
+app.get('*', function (req, res, next) {
+	if (req.headers["x-forwarded-proto"] != "https") 
+		res.redirect("https://" + req.hostname + req.url);
+	else
+		next();
+});
+
 // When the client requests the root directory,
 // send back the rendered index.pug template.
 app.get("/", function (req, res) {
@@ -264,6 +272,6 @@ io.on("connection", function (client) {
  * Heroku, let them pick a port number.
  */
 
-server.listen(process.env.PORT || 8888, function (){
-	console.log("server listening on port 8888");
+var listener = server.listen(process.env.PORT || 8888, function (){
+	console.log("server listening on port " + listener.address().port);
 });
